@@ -1,0 +1,159 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    background-color: #f3f4f6;
+    color: #333;
+}
+
+h1 {
+    margin: 20px 0;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #333;
+    color: #fff;
+}
+
+nav {
+    position: relative;
+}
+
+#themes-menu {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    display: none;
+}
+
+#themes-menu.visible {
+    display: block;
+}
+
+.theme-btn {
+    display: block;
+    padding: 10px;
+    border: none;
+    background-color: #eee;
+    cursor: pointer;
+}
+
+.theme-btn:hover {
+    background-color: #ddd;
+}
+
+#setup,
+#game {
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    margin: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #0078d4;
+    color: white;
+}
+
+button:hover {
+    background-color: #005ea6;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Adjusting Game Board to a 4x4 grid */
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(4, 80px);
+    grid-template-rows: repeat(4, 80px); /* Same for rows */
+    gap: 5px;
+    margin: 20px auto;
+    width: 340px;
+}
+
+.cell {
+    width: 80px; 
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem; /* Adjust font size for visibility */
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    user-select: none;
+}
+
+.cell.taken {
+    cursor: not-allowed;
+    background-color: #e2e2e2;
+}
+
+/* Theme Adjustments */
+body.eva {
+    background-color: #46178f;
+    color: #e2ff26;
+}
+
+body.eva #game-board .cell {
+    background-color: #1e1e1e;
+    color: #e2ff26;
+    border-color: #e2ff26;
+}
+
+body.eva button {
+    background-color: #e2ff26;
+    color: #46178f;
+}
+
+body.eva button:hover {
+    background-color: #cddc1a;
+}
+
+body.purple-green #game-board .cell {
+    background-color: #4b0082; /* Darker purple for contrast */
+    color: green;
+    border-color: green;
+}
+
+body.purple-green button {
+    background-color: green;
+    color: purple;
+}
+
+body.purple-green button:hover {
+    background-color: #228b22; /* Forest green for hover effect */
+}
+
+/* Classic Theme */
+body.classic {
+    background-color: white;
+    color: black;
+}
+
+body.classic #game-board .cell {
+    background-color: #f9f9f9;
+    color: black;
+    border-color: #ccc;
+}
+
+body.classic button {
+    background-color: #ddd;
+    color: black;
+}
+
+body.classic button:hover {
+    background-color: #bbb;
+}

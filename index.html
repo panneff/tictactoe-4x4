@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TicTac 4x4</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>TicTac 4x4</h1>
+    <nav>
+      <button id="themes-tab">Themes</button>
+      <div id="themes-menu" class="hidden">
+        <button class="theme-btn" data-theme="eva">PurpleGreen</button>
+        <button class="theme-btn" data-theme="classic">Classic</button>
+      </div>
+      <div id="score">
+        <span id="player-score">Player: 0</span> | <span id="computer-score">Computer: 0</span>
+      </div>
+    </nav>
+  </header>
+  
+  <section id="setup">
+    <h2>Choose a symbol</h2>
+    <button id="choose-x">X</button>
+    <button id="choose-o">O</button>
+  </section>
+
+  <section id="game" class="hidden">
+    <div id="game-board"></div>
+    <p id="status"></p>
+    <button id="restart">Restart Game</button>
+  </section>
+  
+  <script src="script.js"></script>
+</body>
+</html>
