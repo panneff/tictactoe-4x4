@@ -73,11 +73,14 @@ themeButtons.forEach(btn => {
     btn.addEventListener("click", (e) => {
       const theme = e.target.dataset.theme;
       document.body.className = theme; // Apply theme to body
-      themesMenu.classList.remove("visible"); // Hide menu after selecting theme
+      themesMenu.classList.remove("visible");
       localStorage.setItem("theme", theme); // Save theme to localStorage
     });
   });
 
+  themesTab.addEventListener("click", () => {
+    themesMenu.classList.toggle("visible"); // Toggle visibility of the themes menu
+  });
 
 // Theme handling
 themeButtons.forEach(btn => {
