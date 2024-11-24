@@ -16,21 +16,40 @@
         <button class="theme-btn" data-theme="classic">Classic</button>
       </div>
       <div id="score">
-        <span id="player-score">Player: 0</span> | <span id="computer-score">Computer: 0</span>
+        <span id="player-score">Score: 0</span>
       </div>
     </nav>
   </header>
   
-  <section id="setup">
-    <h2>Choose a symbol</h2>
-    <button id="choose-x">X</button>
-    <button id="choose-o">O</button>
-  </section>
+<section id="setup">
+  <h2>Choose a symbol</h2>
+  <button id="choose-x">X</button>
+  <button id="choose-o">O</button>
+  <div id="difficulty-settings">
+    <input type="range" id="difficulty-slider" min="1" max="3" value="2" step="1">
+    <div id="difficulty-label">Medium</div>
+  </div>
+  <div id="game-mode">
+    <form id="mode-selection">
+      <label class="radio-container">
+        <input type="radio" name="game-mode" value="single" id="singleplayer-radio" checked>
+        <span class="radio-label">Single Player</span>
+      </label>
+      <label class="radio-container">
+        <input type="radio" name="game-mode" value="multi" id="multiplayer-radio">
+        <span class="radio-label">Multiplayer</span>
+      </label>
+    </form>
+  </div>
+</section>
+
+  
 
   <section id="game" class="hidden">
     <div id="game-board"></div>
     <p id="status"></p>
     <button id="restart">Restart Game</button>
+    <button id="main-menu">Main Menu</button>
   </section>
   
   <script src="script.js"></script>

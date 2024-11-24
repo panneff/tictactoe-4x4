@@ -8,10 +8,14 @@ const chooseOBtn = document.getElementById("choose-o");
 const themesTab = document.getElementById("themes-tab");
 const themesMenu = document.getElementById("themes-menu");
 const themeButtons = document.querySelectorAll(".theme-btn");
+const difficultySlider = document.getElementById("difficulty-slider");
+const difficultyLabel = document.getElementById("difficulty-label");
+const modeSelectionForm = document.getElementById("mode-selection");
 
 const boardSize = 4;
+let difficulty = "medium";
+let isMultiplayer = false;
 let playerScore = 0;
-let computerScore = 0;
 let gameBoard = Array(boardSize * boardSize).fill(null);
 let playerSymbol = "X";
 let computerSymbol = "O";
@@ -30,10 +34,7 @@ function loadScore(key) {
   console.log(`Loaded ${key}: ${score}`);
   if (key === 'playerScore') {
     playerScore = score;
-    document.getElementById('player-score').textContent = `Player: ${playerScore}`;
-  } else if (key === 'computerScore') {
-    computerScore = score;
-    document.getElementById('computer-score').textContent = `Computer: ${computerScore}`;
+    document.getElementById('player-score').textContent = `Score: ${playerScore}`;
   }
 }
 
@@ -45,6 +46,14 @@ chooseXBtn.addEventListener("click", () => {
   startGame();
 });
 
+// local multiplayer thing (not online)
+modeSelectionForm.addEventListener("change", (event) => {
+  const selectedMode = event.target.value;
+  isMultiplayer = selectedMode === "multi";
+  const modeText = isMultiplayer ? "Multiplayer Mode" : "Single Player Mode";
+  document.getElementById("status").textContent = modeText;
+});
+
 chooseOBtn.addEventListener("click", () => {
   playerSymbol = "O";
   computerSymbol = "X";
@@ -53,21 +62,53 @@ chooseOBtn.addEventListener("click", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  loadScore("playerScore");
-  loadScore("computerScore");
-
-  // Load saved symbol from localStorage if available
-  const savedPlayerSymbol = localStorage.getItem('playerSymbol');
-  if (savedPlayerSymbol) {
-    playerSymbol = savedPlayerSymbol;
-    computerSymbol = playerSymbol === "X" ? "O" : "X";
+  const singlePlayerRadio = document.getElementById("singleplayer-radio");
+  if (singlePlayerRadio) {
+    singlePlayerRadio.checked = true;
   }
 
-  // Show the main page (setup screen)
+  loadScore("playerScore");
+
   setup.classList.remove("hidden");
   game.classList.add("hidden");
 });
 
+
+const mainMenuBtn = document.getElementById("main-menu");
+mainMenuBtn.addEventListener("click", () => {
+  location.reload();  // Reload the page to return to the setup screen because I'm lazy
+});
+
+
+const difficultyLevels = {
+  1: "easy",
+  2: "medium",
+  3: "hard",
+};
+
+const difficultyDescriptions = {
+  easy: "Easy",
+  medium: "Medium",
+  hard: "Hard",
+};
+
+difficultySlider.addEventListener("input", (e) => {
+  difficulty = difficultyLevels[e.target.value];
+  difficultyLabel.textContent = difficultyDescriptions[difficulty];
+  localStorage.setItem("difficulty", difficulty);
+  console.log(`Difficulty set to: ${difficulty}`);
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const savedDifficulty = localStorage.getItem("difficulty") || "medium";
+  difficulty = savedDifficulty;
+
+  const sliderValue = Object.keys(difficultyLevels).find(
+    (key) => difficultyLevels[key] === savedDifficulty
+  );
+  difficultySlider.value = sliderValue;
+  difficultyLabel.textContent = difficultyDescriptions[savedDifficulty];
+});
 
 themeButtons.forEach(btn => {
     btn.addEventListener("click", (e) => {
@@ -102,9 +143,13 @@ function startGame() {
   game.classList.remove("hidden");
   gameBoard = Array(boardSize * boardSize).fill(null);
   currentPlayer = playerSymbol;
-  status.textContent = `Player ${playerSymbol}'s turn`;
+  status.textContent = `Player ${playerSymbol}'s turn (Difficulty: ${difficultyDescriptions[difficulty]})`;
+  status.textContent = isMultiplayer
+  ? `Player ${currentPlayer}'s turn (Multiplayer Mode)`
+  : `Player ${playerSymbol}'s turn (Single Player Mode)`;
   initBoard();
 }
+
 
 function initBoard() {
   board.innerHTML = "";
@@ -118,49 +163,60 @@ function initBoard() {
 }
 
 function handleCellClick(event) {
-    const index = event.target.dataset.index;
-  
-    if (isGameOver || gameBoard[index]) return;
-  
-    gameBoard[index] = currentPlayer;
-  
-    const cell = document.querySelector(`[data-index='${index}']`);
-    cell.textContent = currentPlayer;
-    cell.classList.add("taken"); // todo
-  
-    if (checkWinner()) {
-      isGameOver = true;
-      status.textContent = `${currentPlayer} wins!`;
-      return;
-    }
-  
-    if (!gameBoard.includes(null)) {
-      isGameOver = true;
-      status.textContent = "It's a draw!";
-      return;
-    }
-  
-    currentPlayer = currentPlayer === playerSymbol ? computerSymbol : playerSymbol;
-    status.textContent = `${currentPlayer === playerSymbol ? "Player" : "Computer"}'s turn`;
-  
-    if (currentPlayer === computerSymbol && !isGameOver) {
-      const bestMove = findBestMove();
-      setTimeout(() => {
-        makeMove(bestMove, computerSymbol);
-        if (checkWinner()) {
-          isGameOver = true;
-          status.textContent = "Computer wins!";
-        } else if (!gameBoard.includes(null)) {
-          isGameOver = true;
-          status.textContent = "It's a draw!";
-        } else {
-          currentPlayer = playerSymbol;
-          status.textContent = "Player's turn";
-        }
-      }, 1000);
-    }
+  const index = event.target.dataset.index;
+
+  // Prevent clicks on already-taken cells or if the game is over
+  if (isGameOver || gameBoard[index]) return;
+
+  // Current player makes a move
+  gameBoard[index] = currentPlayer;
+
+  const cell = document.querySelector(`[data-index='${index}']`);
+  cell.textContent = currentPlayer;
+  cell.classList.add("taken");
+
+  // Check if the current move resulted in a win or draw
+  if (checkWinner()) {
+    isGameOver = true;
+    status.textContent = `${currentPlayer} wins!`;
+    return;
   }
-  
+
+  if (!gameBoard.includes(null)) {
+    isGameOver = true;
+    status.textContent = "It's a draw!";
+    return;
+  }
+
+  // Multiplayer mode: Switch to the other player
+  if (isMultiplayer) {
+    currentPlayer = currentPlayer === "X" ? "O" : "X";
+    status.textContent = `Player ${currentPlayer}'s turn`;
+    return;
+  }
+
+  // Single-player mode: Allow AI to make its move
+  currentPlayer = currentPlayer === playerSymbol ? computerSymbol : playerSymbol;
+  status.textContent = `${currentPlayer === playerSymbol ? "Player" : "Computer"}'s turn`;
+
+  if (currentPlayer === computerSymbol && !isGameOver) {
+    setTimeout(() => {
+      const bestMove = findBestMove();
+      makeMove(bestMove, computerSymbol);
+      if (checkWinner()) {
+        isGameOver = true;
+        status.textContent = "Computer wins!";
+      } else if (!gameBoard.includes(null)) {
+        isGameOver = true;
+        status.textContent = "It's a draw!";
+      } else {
+        currentPlayer = playerSymbol;
+        status.textContent = "Player's turn";
+      }
+    }, 1000);
+  }
+}
+
 
 function checkWinner() {
     const winningCombinations = [];
@@ -191,11 +247,7 @@ function checkWinner() {
         if (currentPlayer === playerSymbol) {
           playerScore++;
           saveScore('playerScore', playerScore);
-          document.getElementById('player-score').textContent = `Player: ${playerScore}`;
-        } else {
-          computerScore++;
-          saveScore('computerScore', computerScore);
-          document.getElementById('computer-score').textContent = `Computer: ${computerScore}`;
+          document.getElementById('player-score').textContent = `Score: ${playerScore}`;
         }
         return true;
       }
@@ -204,10 +256,26 @@ function checkWinner() {
   }
   
 
-function findBestMove() {
-  const availableMoves = gameBoard.map((cell, index) => (cell === null ? index : null)).filter(index => index !== null);
-
-  const optimalPlayProbability = Math.min(0.5 + (computerScore * 0.07), 1);
+  function findBestMove() {
+    const availableMoves = gameBoard
+      .map((cell, index) => (cell === null ? index : null))
+      .filter(index => index !== null);
+  
+    let optimalPlayProbability;
+  
+    switch (difficulty) {
+      case "easy":
+        optimalPlayProbability = 0.3; 
+        break;
+      case "medium":
+        optimalPlayProbability = 0.6; 
+        break;
+      case "hard":
+        optimalPlayProbability = 0.9;
+        break;
+      default:
+        optimalPlayProbability = 0.5; // not really need but yeah
+    }
 
   function findThreatOrWin(symbol) {
     for (let i = 0; i < boardSize; i++) {
@@ -228,6 +296,18 @@ function findBestMove() {
       if (column.filter(cell => cell === symbol).length === boardSize - 1 && emptyIndexInColumn !== -1) {
         return emptyIndexInColumn;
       }
+
+      const playOptimally = Math.random() < optimalPlayProbability;
+
+      if (playOptimally) {
+        const winningMove = findThreatOrWin(computerSymbol);
+        if (winningMove !== null) return winningMove;
+    
+        const blockingMove = findThreatOrWin(playerSymbol);
+        if (blockingMove !== null) return blockingMove;
+      }
+    
+      return availableMoves[Math.floor(Math.random() * availableMoves.length)];
     }
 
     const diagonal1 = [];
