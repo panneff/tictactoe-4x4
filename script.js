@@ -22,6 +22,7 @@ let computerSymbol = "O";
 let currentPlayer = "X"; // Player goes first
 let isGameOver = false;
 let winningCombination = [];
+let isAITurn = false;
 
 // Save and load scores using localStorage
 function saveScore(key, score) {
@@ -152,7 +153,7 @@ function startGame() {
 
 
 function initBoard() {
-  board.innerHTML = "";
+  board.innerHTML = ""; 
   gameBoard.forEach((_, index) => {
     const cell = document.createElement("div");
     cell.classList.add("cell");
@@ -162,20 +163,18 @@ function initBoard() {
   });
 }
 
+
 function handleCellClick(event) {
   const index = event.target.dataset.index;
 
-  // Prevent clicks on already-taken cells or if the game is over
-  if (isGameOver || gameBoard[index]) return;
+  if (isGameOver || gameBoard[index] || isAITurn) return;
 
-  // Current player makes a move
   gameBoard[index] = currentPlayer;
 
   const cell = document.querySelector(`[data-index='${index}']`);
-  cell.textContent = currentPlayer;
+  cell.textContent = currentPlayer
   cell.classList.add("taken");
 
-  // Check if the current move resulted in a win or draw
   if (checkWinner()) {
     isGameOver = true;
     status.textContent = `${currentPlayer} wins!`;
@@ -188,21 +187,21 @@ function handleCellClick(event) {
     return;
   }
 
-  // Multiplayer mode: Switch to the other player
   if (isMultiplayer) {
-    currentPlayer = currentPlayer === "X" ? "O" : "X";
-    status.textContent = `Player ${currentPlayer}'s turn`;
+    currentPlayer = currentPlayer === "X" ? "O" : "X"
+    status.textContent = `Player ${currentPlayer}'s turn`
     return;
   }
 
-  // Single-player mode: Allow AI to make its move
-  currentPlayer = currentPlayer === playerSymbol ? computerSymbol : playerSymbol;
+  currentPlayer = currentPlayer === playerSymbol ? computerSymbol : playerScore;
   status.textContent = `${currentPlayer === playerSymbol ? "Player" : "Computer"}'s turn`;
 
   if (currentPlayer === computerSymbol && !isGameOver) {
+    isAITurn = true;
     setTimeout(() => {
       const bestMove = findBestMove();
       makeMove(bestMove, computerSymbol);
+
       if (checkWinner()) {
         isGameOver = true;
         status.textContent = "Computer wins!";
@@ -213,6 +212,7 @@ function handleCellClick(event) {
         currentPlayer = playerSymbol;
         status.textContent = "Player's turn";
       }
+      isAITurn = false;
     }, 1000);
   }
 }
@@ -353,7 +353,7 @@ function checkWinner() {
 function makeMove(index, symbol) {
   gameBoard[index] = symbol;
   const cell = document.querySelector(`[data-index='${index}']`);
-  cell.textContent = symbol;
+  cell.textContent = symbol; // Error likely here if `cell` is null, I have no idea how to fix this.
   cell.classList.add("taken");
   checkWinner();
 }
